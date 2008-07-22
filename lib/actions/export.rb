@@ -21,6 +21,11 @@ module ActiveScaffold::Actions
     
     def init_session_var
       session[:search] = params[:search] if !params[:search].nil? || params[:commit] == as_('Search')
+      if params[:commit] == as_('Search')
+        session[:filters] = params.select {|k,v| k.to_s =~ /filter_/ }
+      end
+      #session[:filters].merge!(params.select {|k,v| k.to_s =~ /filter_/ })
+      logger.debug "ISV    #{params.keys}   Filters = #{session[:filters]}"
     end
 
     # display the customization form or skip directly to export
@@ -75,6 +80,8 @@ module ActiveScaffold::Actions
       
       find_options = { :sorting => active_scaffold_config.list.user.sorting }
       params[:search] = session[:search]
+      session[:filters].each {|f| params[f.first] = f.last } if session[:filters]
+
       do_search rescue nil
       params[:segment_id] = session[:segment_id]
       do_segment_search rescue nil
