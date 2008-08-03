@@ -25,7 +25,7 @@ module ActiveScaffold::Config
       end
     end
 
-    attr_writer :show_form, :allow_full_download, :force_quotes, :default_full_download, :default_delimiter, :default_skip_header, :default_deselected_columns
+    attr_writer :show_form, :allow_full_download, :force_quotes, :default_full_download, :default_delimiter, :default_skip_header, :default_deselected_columns, :default_xls_format
     def show_form
       self.show_form = @core.export_show_form if @show_form.nil?
       @show_form
@@ -53,6 +53,10 @@ module ActiveScaffold::Config
     def default_deselected_columns
       self.default_deselected_columns = [] if @default_deselected_columns.nil?
       @default_deselected_columns
+    end
+    def default_xls_format
+      self.default_xls_format = @core.export_default_xls_format if @default_xls_format.nil?
+      @default_xls_format      
     end
 
     # provides access to the list of columns specifically meant for this action to use

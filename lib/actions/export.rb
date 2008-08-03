@@ -57,7 +57,8 @@ module ActiveScaffold::Actions
           :export_columns => export_columns,
           :full_download => export_config.default_full_download.to_s,
           :delimiter => export_config.default_delimiter,
-          :skip_header => export_config.default_skip_header.to_s
+          :skip_header => export_config.default_skip_header.to_s,
+          :xls_format => export_config.default_xls_format.to_s
         }
         params.merge!(options)
       end
@@ -65,7 +66,11 @@ module ActiveScaffold::Actions
       find_items_for_export
 
       response.headers['Content-Disposition'] = "attachment; filename=#{export_file_name}"
-      render :partial => 'export', :layout => false, :content_type => Mime::CSV, :status => response_status 
+      if params[:xls_format]
+        render :partial => 'export.rxml', :content_type => 'application/vnd.ms-excel', :status => response_status
+      else
+        render :partial => 'export', :layout => false, :content_type => Mime::CSV, :status => response_status 
+      end
     end
 
     protected
@@ -100,7 +105,7 @@ module ActiveScaffold::Actions
     # The default name of the downloaded file.
     # You may override the method to specify your own file name generation.
     def export_file_name
-      "#{self.controller_name}.csv"
+      "#{self.controller_name}.#{params[:xls_format] ? 'xls' : 'csv'}"
     end
 
     # The default security delegates to ActiveRecordPermissions.

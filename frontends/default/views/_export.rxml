@@ -1,0 +1,82 @@
+xml.instruct! :xml, :version=>"1.0", :encoding=>"UTF-8" 
+xml.Workbook({
+    'xmlns'      => "urn:schemas-microsoft-com:office:spreadsheet", 
+    'xmlns:o'    => "urn:schemas-microsoft-com:office:office",
+    'xmlns:x'    => "urn:schemas-microsoft-com:office:excel",    
+    'xmlns:html' => "http://www.w3.org/TR/REC-html40",
+    'xmlns:ss'   => "urn:schemas-microsoft-com:office:spreadsheet" 
+  }) do
+
+  xml.Styles do
+    xml.Style 'ss:ID' => 'Default', 'ss:Name' => 'Normal' do
+      xml.Alignment 'ss:Vertical' => 'Bottom'
+      xml.Borders
+      xml.Font 'ss:FontName' => 'Verdana'
+      xml.Interior
+      xml.NumberFormat
+      xml.Protection
+    end
+   
+    xml.Style 'ss:ID' => 'Header' do
+      xml.Alignment 'ss:Vertical' => 'Bottom'
+      xml.Borders do
+        xml.Border 'ss:Position' => 'Bottom', 'ss:LineStyle' => 'Continuous', 'ss:Weight' => 1
+        xml.Border 'ss:Position' => 'Left', 'ss:LineStyle' => 'Continuous', 'ss:Weight' => 1
+        xml.Border 'ss:Position' => 'Right', 'ss:LineStyle' => 'Continuous', 'ss:Weight' => 1
+        xml.Border 'ss:Position' => 'Top', 'ss:LineStyle' => 'Continuous', 'ss:Weight' => 1
+      end
+      xml.Interior 'ss:Color' => '#C0C0C0', 'ss:Pattern' => 'Solid'
+    end
+    
+    xml.Style 'ss:ID' => 'CustomDate' do
+      xml.NumberFormat 'ss:Format' => 'd-mmm-yyyy'
+    end
+    
+  end
+    
+  xml.Worksheet 'ss:Name' => 'Export' do
+    xml.Table do 
+      if @records
+        record_types = {}
+        record = @records[0]
+        @export_columns.each do |e|
+          type = record.class.columns_hash[e.name.to_s].type rescue :string
+          case type
+          when :datetime, :date, :time
+            record_types[e] = 'DateTime'
+          when :integer, :decimal, :float
+            record_types[e] = 'Number'
+          else
+            record_types[e] = 'String'
+          end
+        end
+      end
+      
+      # Header
+      unless params[:skip_header]
+        xml.Row do
+          @export_columns.each do |e|
+            xml.Cell 'ss:StyleID' => 'Header' do
+              xml.Data format_export_column_header_name(e), 'ss:Type' => 'String'
+            end
+          end
+        end
+      end
+      
+      # Data
+      for record in @records
+        xml.Row do
+          @export_columns.each do |e|
+            cell_value = get_export_column_value(record, e)
+            cell_type = cell_value.empty? ? 'String' : record_types[e]            
+            cell_style = (cell_type == 'DateTime') ? 'CustomDate' : 'Default'
+            xml.Cell 'ss:StyleID' => cell_style do              
+              xml.Data cell_value, 'ss:Type' => cell_type
+            end
+          end
+        end
+        
+      end
+    end
+  end
+end

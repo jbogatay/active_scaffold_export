@@ -46,15 +46,41 @@ module ActiveScaffold
 
       def format_plural_association_export_column(association_records)
         firsts = association_records.first(4).collect { |v| v.to_label }
-        firsts[3] = '…' if firsts.length == 4
+        firsts[3] = 'ï¿½' if firsts.length == 4
         format_column(firsts.join(','))
       end
 
       ## This helper can be overridden to change the way that the headers
       # are formatted. For instance, you might want column.name.to_s.humanize
       def format_export_column_header_name(column)
-        column.name.to_s
+        column.name.to_s.humanize
+        #column.name.to_s
       end
+      
+      def format_export_column(column_value)
+        if column_empty?(column_value)
+          active_scaffold_config.list.empty_field_text
+        elsif column_value.instance_of? Time
+          format_export_time(column_value)
+        elsif column_value.instance_of? Date
+          format_export_date(column_value)
+        else
+          column_value.to_s
+        end
+      end
+
+      def format_export_time(time)
+        #format = ActiveSupport::CoreExtensions::Time::Conversions::DATE_FORMATS[:default] || "%m/%d/%Y %I:%M %p"
+        format = '%Y-%m-%d %H:%M:%S'
+        time.strftime(format)
+      end
+
+      def format_export_date(date)
+        #format = ActiveSupport::CoreExtensions::Date::Conversions::DATE_FORMATS[:default] || "%m/%d/%Y"
+        format = '%Y-%m-%d'
+        date.strftime(format)
+      end
+      
     end
   end
 end

@@ -16,6 +16,9 @@
 <div class="separator"></div>
 <h3><%=as_('Options')%></h3>
 <div class="options checkbox-list">
+ <div class="option checkbox-wrapper">
+    <%= content_tag(:label, check_box_tag('xls_format', 1, export_config.default_xls_format) + " #{as_('Excel Spreadsheet Format')}") %>
+  </div>  
   <div class="option checkbox-wrapper">
     <%= content_tag(:label, check_box_tag('skip_header', 1, export_config.default_skip_header) + " #{as_('Omit Header')}") %>
   </div>
@@ -29,6 +32,8 @@
   <div class="option checkbox-wrapper">
     <%= content_tag(:label, radio_button_tag('full_download', true, export_config.default_full_download) + " #{as_('All Pages')}") if export_config.allow_full_download %>
   </div>
+ 
+
   &nbsp;
 </div>
 <div class="separator"></div>
